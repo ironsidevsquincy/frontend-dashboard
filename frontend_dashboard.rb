@@ -7,36 +7,21 @@ class FrontendDashboard < Sinatra::Base
     haml :index, :locals => { :type => '' }
   end
 
-  get '/yesterday' do
+  get '/log' do
     current_page = params[:page] ? params[:page].to_i : 1
-    haml :yesterday, :locals => { :errors => JsError.paginate({ :order => :timestamp.desc, :per_page => params[:'per-page'] || 50, :page => current_page }), :type => 'yesterday', :current_page => current_page }
+    haml :log, :locals => { :errors => JsError.paginate({ :order => :timestamp.desc, :per_page => params[:'per-page'] || 50, :page => current_page }), :type => 'yesterday', :current_page => current_page }
   end
 
   get '/occurrences' do 
     if (params[:file] || params[:message])
       where_param = (params[:file]) ? 'file' : 'message'
       where_value = params[:file] || params[:message]
-      errors = JsError.group_occurrences(
-        (params[:file]) ? 'message' : 'file', {
-          :query => {
-            where_param => where_value,
-            :timestamp => { "$gte" => Chronic.parse('2 days ago midnight'), "$lt" => Chronic.parse('yesterday midnight')}
-          }
-        }
-      )
+      errors = JsError.group_occurrences((params[:file]) ? 'message' : 'file')
     elsif (params[:by])
-      errors = JsError.group_occurrences(
-        params[:by], {
-          :query => {:timestamp => { "$gte" => Chronic.parse('2 days ago midnight'), "$lt" => Chronic.parse('yesterday midnight')}}
-        }
-      )
+      errors = JsError.group_occurrences(params[:by])
     else
       # default to 'by message'
-      errors = JsError.group_occurrences(
-        'message', {
-          :query => {:timestamp => { "$gte" => Chronic.parse('2 days ago midnight'), "$lt" => Chronic.parse('yesterday midnight')}}
-        }
-      )
+      errors = JsError.group_occurrences('message')
     end
     haml :occurrences, :locals => { :errors => errors, :type => 'occurrences', :where_param => where_param, :where_value => where_value }
   end

@@ -4,9 +4,12 @@ s3 = Fog::Storage.new(
   :aws_secret_access_key  => ENV['AWSSecretKey']
 )
 
+latest_error = JsError.sort(:timestamp.desc).first._id.generation_time
+
 s3.get_bucket('aws-frontend-logs', {
-  'prefix' => 'PROD/access.log/%s/frontend-diagnostics' % [Chronic.parse('yesterday').strftime('%Y/%m/%d')]
+  'prefix' => 'PROD/access.log/%s/frontend-diagnostics' % [Chronic.parse('now').strftime('%Y/%m/%d')]
 }).body['Contents'].each { |file|
+    next unless file['LastModified'] > latest_error
     puts "Reading file #{file['Key']}"
     s3.directories.get('aws-frontend-logs').files.get(file['Key']).body.force_encoding('utf-8').split(/\n/).each{ |line| 
       if (line.include? 'GET /px.gif?js/') 
@@ -29,3 +32,6 @@ s3.get_bucket('aws-frontend-logs', {
       end
     }
   }
+
+# delete records older than 24 hours
+JsError.delete_all(:timestamp.lt => Chronic.parse('1 day ago'))

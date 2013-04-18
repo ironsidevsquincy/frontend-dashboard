@@ -7,7 +7,7 @@
 %ul
   - errors.each do |error|
     %li 
-      %h4{:id => (error.timestamp.to_i)}= error.timestamp.strftime('%a %-d, %T')
+      %h4{:id => (error.timestamp.to_i)}= error.timestamp.localtime.strftime('%a %-d, %T')
       %dl.dl-horizontal
         %dt Message: 
         %dd
