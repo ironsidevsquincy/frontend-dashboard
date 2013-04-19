@@ -4,12 +4,13 @@ s3 = Fog::Storage.new(
   :aws_secret_access_key  => ENV['AWSSecretKey']
 )
 
-latest_error = JsError.sort(:timestamp.desc).first._id.generation_time
+latest_error = JsError.sort(:timestamp.desc).first
+latest_update = latest_error ? latest_error._id.generation_time : Chronic.parse('1 hour ago')
 
 s3.get_bucket('aws-frontend-logs', {
   'prefix' => 'PROD/access.log/%s/frontend-diagnostics' % [Chronic.parse('now').strftime('%Y/%m/%d')]
 }).body['Contents'].each { |file|
-    next unless file['LastModified'] > latest_error
+    next unless file['LastModified'] > latest_update
     puts "Reading file #{file['Key']}"
     s3.directories.get('aws-frontend-logs').files.get(file['Key']).body.force_encoding('utf-8').split(/\n/).each{ |line| 
       if (line.include? 'GET /px.gif?js/') 
