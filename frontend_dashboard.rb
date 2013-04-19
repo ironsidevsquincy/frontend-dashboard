@@ -16,7 +16,7 @@ class FrontendDashboard < Sinatra::Base
     if (params[:file] || params[:message])
       where_param = (params[:file]) ? 'file' : 'message'
       where_value = params[:file] || params[:message]
-      errors = JsError.group_occurrences((params[:file]) ? 'message' : 'file')
+      errors = JsError.group_occurrences((params[:file]) ? 'message' : 'file', { :query => { where_param => where_value } })
     elsif (params[:by])
       errors = JsError.group_occurrences(params[:by])
     else
@@ -27,7 +27,7 @@ class FrontendDashboard < Sinatra::Base
   end
 
   get '/user-agents' do
-    haml :'user_agents', :locals => { :errors => JsError.all, :type => 'user-agents'}, :cdata => true
+    haml :'user_agents', :locals => { :errors => JsError.all, :type => 'user-agents' }, :cdata => true
   end
     
 end
