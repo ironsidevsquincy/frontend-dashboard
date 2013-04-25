@@ -7,6 +7,10 @@ s3 = Fog::Storage.new(
 latest_error = JsError.sort(:timestamp.desc).first
 latest_update = latest_error ? latest_error._id.generation_time : Chronic.parse('1 hour ago')
 
+def unhash(value)
+  value.gsub(/\.[a-z0-9]{32}\.js/, '.js')
+end
+
 s3.get_bucket('aws-frontend-logs', {
   'prefix' => 'PROD/access.log/%s/frontend-diagnostics' % [Chronic.parse('now').strftime('%Y/%m/%d')]
 }).body['Contents'].each { |file|
@@ -22,8 +26,8 @@ s3.get_bucket('aws-frontend-logs', {
           JsError.create(
             :timestamp => DateTime.strptime(timestamp, '%d/%b/%Y:%H:%M:%S %z'),
             :url => url,
-            :message => URI.decode(msg_parts['message'][0]),
-            :file => URI.decode(msg_parts['filename'][0]),
+            :message => unhash(URI.decode(msg_parts['message'][0])),
+            :file => unhash(URI.decode(msg_parts['filename'][0])),
             :line_no => msg_parts['lineno'][0],
             :ua_name => ua.name.to_s,
             :ua_device => ua.device.to_s,
