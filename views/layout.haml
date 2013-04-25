@@ -33,6 +33,8 @@
                   %a{:href => '/occurrences?by=message'} By Message
                 %li{:class => ('active' if params[:by] === 'file' || !params[:message].nil?)}
                   %a{:href => '/occurrences?by=file'} By File
+            %li{:class => ('active' if type === 'graphs')} 
+              %a{:href => '/graphs'} Graphs
             %li{:class => ('active' if type === 'user-agents')} 
               %a{:href => '/user-agents'} User Agents
       =yield

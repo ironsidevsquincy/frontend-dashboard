@@ -29,5 +29,13 @@ class FrontendDashboard < Sinatra::Base
   get '/user-agents' do
     haml :'user_agents', :locals => { :errors => JsError.all, :type => 'user-agents' }, :cdata => true
   end
+
+  get '/graphs' do
+    errors = (params[:message]) ? JsError.all({ :message => params[:message] }) : JsError.all
+    errors.map! { |error|
+      { :timestamp => error.timestamp, :message => error.message }.to_json
+    }
+    haml :graphs, :locals => { :errors => errors, :type => 'graphs' }, :cdata => true
+  end
     
 end

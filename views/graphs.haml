@@ -1,19 +1,6 @@
-%form.form-inline#controls
-  %legend Controls
-  %label.radio
-    %input{:type => 'radio', :name => 'show', :value => 'browser', :checked => 'checked'} Browsers
-  %label.radio
-    %input{:type => 'radio', :name => 'show', :value => 'os'} OSes
-  %label.radio
-    %input{:type => 'radio', :name => 'show', :value => 'device'} Devices
-  %label.checkbox
-    %input{:type => 'checkbox', :name => 'top-five', :value => 1} Top 5
-
 %svg#chart
 %script
   var errors = [
-  - errors.each do |error|
-    {time: #{error[0]}, os: '#{error[3]}', browser: '#{error[4]}', device: '#{error[5]}' }
-    ,
+  = errors.join(',')
   ];
-%script{:src => '/javascripts/bootstraps/user-agents.js'}
+%script{:src => '/javascripts/bootstraps/graphs.js'}
