@@ -8,7 +8,13 @@ latest_error = JsError.sort(:timestamp.desc).first
 latest_update = latest_error ? latest_error._id.generation_time : Chronic.parse('1 hour ago')
 
 def unhash(value)
+  # remove hash from file name
   value.gsub(/\.[a-z0-9]{32}\.js/, '.js')
+end
+
+def sanitise_msg(msg)
+  # remove redundant message
+  unhash(msg).gsub(/^Error: Syntax or http error:/, 'Syntax or http error:')
 end
 
 s3.get_bucket('aws-frontend-logs', {
@@ -26,7 +32,7 @@ s3.get_bucket('aws-frontend-logs', {
           JsError.create(
             :timestamp => DateTime.strptime(timestamp, '%d/%b/%Y:%H:%M:%S %z'),
             :url => url,
-            :message => unhash(URI.decode(msg_parts['message'][0])),
+            :message => sanitise_msg(URI.decode(msg_parts['message'][0])),
             :file => unhash(URI.decode(msg_parts['filename'][0])),
             :line_no => msg_parts['lineno'][0],
             :ua_name => ua.name.to_s,
